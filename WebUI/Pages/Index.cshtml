@@ -1,0 +1,35 @@
+﻿@page
+@using WebUI.Pages.Models;
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<h2>Simple Calculator</h2>
+
+<form method="post">
+    <div>
+        <label>First Number:</label>
+        <input type="number" asp-for="Calc.FirstNumber" required />
+    </div>
+    <div>
+        <label>Second Number:</label>
+        <input type="number" asp-for="Calc.SecondNumber" required />
+    </div>
+    <div>
+        <label>Operation:</label>
+        <select asp-for="Calc.Operation">
+            <option value="add">Add</option>
+            <option value="subtract">Subtract</option>
+            <option value="multiply">Multiply</option>
+            <option value="divide">Divide</option>
+        </select>
+    </div>
+    <div>
+        <button type="submit">Calculate</button>
+    </div>
+    <div>
+        <label>Result:</label>
+        <span>@Model.Calc.Result</span>
+    </div>
+</form>

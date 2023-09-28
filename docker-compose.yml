@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+
+  history-db:
+      image: mcr.microsoft.com/mssql/server:2019-latest
+      environment:
+        SA_PASSWORD: "8zWt4$YgJp!LmR6@kC3#eQb0"
+        ACCEPT_EULA: "Y"
+      ports:
+        - "1433:1433"
+
+  minusservice:
+    build:
+      context: .
+      dockerfile: MinusService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 8180:80
+    
+  plusservice:
+    build:
+      context: .
+      dockerfile: PlusService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 8080:80
+
+  historyservice:
+    build:
+      context: .
+      dockerfile: HistoryService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=history-db;Database=histDbLocal;User Id=sa;Password=8zWt4$YgJp!LmR6@kC3#eQb0;TrustServerCertificate=true;Connection Timeout=30;
+    ports:
+      - 8280:80
+    depends_on:
+      - history-db
+
+  angular-app:
+    build:
+      context: ./CalculatorFrontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 4200:4200
+
+  nginx-proxy:
+    build:
+      context: ./CalculatorFrontend
+      dockerfile: Dockerfile.nginx
+    ports:
+      - 8081:8081
+    depends_on:
+      - angular-app
