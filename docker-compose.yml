@@ -10,7 +10,7 @@ services:
       ports:
         - "1433:1433"
 
-  minusservice:
+  minusservice1:
     build:
       context: .
       dockerfile: MinusService/Dockerfile
@@ -20,8 +20,30 @@ services:
       - ASPNETCORE_URLS=http://+:80
     ports:
       - 8180:80
+
+  minusservice2:
+    build:
+      context: .
+      dockerfile: MinusService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 8181:80
+
+  minusservice3:
+    build:
+      context: .
+      dockerfile: MinusService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 8182:80
     
-  plusservice:
+  plusservice1:
     build:
       context: .
       dockerfile: PlusService/Dockerfile
@@ -31,6 +53,28 @@ services:
       - ASPNETCORE_URLS=http://+:80
     ports:
       - 8080:80
+
+  plusservice2:
+    build:
+      context: .
+      dockerfile: PlusService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 8082:80
+
+  plusservice3:
+    build:
+      context: .
+      dockerfile: PlusService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - 8083:80
 
   historyservice:
     build:
