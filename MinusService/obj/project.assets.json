@@ -292,16 +292,6 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
-      },
-      "SharedModels/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v7.0",
-        "compile": {
-          "bin/placeholder/SharedModels.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/SharedModels.dll": {}
-        }
       }
     }
   },
@@ -1021,11 +1011,6 @@
         "swashbuckle.aspnetcore.swaggerui.6.4.0.nupkg.sha512",
         "swashbuckle.aspnetcore.swaggerui.nuspec"
       ]
-    },
-    "SharedModels/1.0.0": {
-      "type": "project",
-      "path": "../SharedModels/SharedModels.csproj",
-      "msbuildProject": "../SharedModels/SharedModels.csproj"
     }
   },
   "projectFileDependencyGroups": {
@@ -1034,7 +1019,6 @@
       "Microsoft.Extensions.Http.Polly >= 7.0.11",
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets >= 1.17.0",
       "Polly >= 7.2.4",
-      "SharedModels >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
   },
@@ -1069,11 +1053,7 @@
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
-          "projectReferences": {
-            "C:\\Users\\THolm\\source\\repos\\Calculator\\SharedModels\\SharedModels.csproj": {
-              "projectPath": "C:\\Users\\THolm\\source\\repos\\Calculator\\SharedModels\\SharedModels.csproj"
-            }
-          }
+          "projectReferences": {}
         }
       },
       "warningProperties": {

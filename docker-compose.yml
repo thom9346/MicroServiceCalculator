@@ -10,6 +10,21 @@ services:
       ports:
         - "1433:1433"
 
+  seq:
+    image: datalust/seq
+    ports:
+      - 5341:5341
+      - 5342:80
+    volumes:
+      - rps_seq_data:/data
+    environment:
+      - ACCEPT_EULA=Y
+
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+
   minusservice1:
     build:
       context: .
@@ -52,7 +67,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
     ports:
-      - 8080:80
+      - 8380:80
 
   plusservice2:
     build:
@@ -63,7 +78,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
     ports:
-      - 8082:80
+      - 8381:80
 
   plusservice3:
     build:
@@ -74,9 +89,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
     ports:
-      - 8083:80
+      - 8382:80
 
-  historyservice:
+  historyservice1:
     build:
       context: .
       dockerfile: HistoryService/Dockerfile
@@ -90,18 +105,82 @@ services:
     depends_on:
       - history-db
 
-  angular-app:
+  historyservice2:
+    build:
+      context: .
+      dockerfile: HistoryService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=history-db;Database=histDbLocal;User Id=sa;Password=8zWt4$YgJp!LmR6@kC3#eQb0;TrustServerCertificate=true;Connection Timeout=30;
+    ports:
+      - 8281:80
+    depends_on:
+      - history-db
+
+  historyservice3:
+    build:
+      context: .
+      dockerfile: HistoryService/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__DefaultConnection=Server=history-db;Database=histDbLocal;User Id=sa;Password=8zWt4$YgJp!LmR6@kC3#eQb0;TrustServerCertificate=true;Connection Timeout=30;
+    ports:
+      - 8282:80
+    depends_on:
+      - history-db
+
+  angular-app1:
     build:
       context: ./CalculatorFrontend
       dockerfile: ./Dockerfile
     ports:
       - 4200:4200
 
-  nginx-proxy:
+  angular-app2:
+    build:
+      context: ./CalculatorFrontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 4201:4200
+
+  angular-app3:
+    build:
+      context: ./CalculatorFrontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 4202:4200
+
+  nginx-proxy1:
     build:
       context: ./CalculatorFrontend
       dockerfile: Dockerfile.nginx
     ports:
       - 8081:8081
+      - 8084:8084
     depends_on:
-      - angular-app
+      - angular-app1
+
+  nginx-proxy2:
+    build:
+      context: ./CalculatorFrontend
+      dockerfile: Dockerfile.nginx
+    ports:
+      - 8082:8081
+    depends_on:
+      - angular-app2
+
+  nginx-proxy3:
+    build:
+      context: ./CalculatorFrontend
+      dockerfile: Dockerfile.nginx
+    ports:
+      - 8083:8081
+    depends_on:
+      - angular-app3
+
+volumes:
+  rps_seq_data:

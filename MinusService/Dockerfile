@@ -8,7 +8,6 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["MinusService/MinusService.csproj", "MinusService/"]
-COPY ["SharedModels/SharedModels.csproj", "SharedModels/"]
 RUN dotnet restore "MinusService/MinusService.csproj"
 COPY . .
 WORKDIR "/src/MinusService"

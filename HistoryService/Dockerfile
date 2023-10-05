@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["HistoryService/HistoryService.csproj", "HistoryService/"]
+COPY ["Monitoring/Monitoring.csproj", "Monitoring/"]
 COPY ["SharedModels/SharedModels.csproj", "SharedModels/"]
 RUN dotnet restore "HistoryService/HistoryService.csproj"
 COPY . .

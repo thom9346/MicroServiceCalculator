@@ -2,6 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 
@@ -9,11 +10,14 @@ builder.Services.AddCors();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 builder.Services.AddHttpClient("HistoryClient", client =>
 {
-    client.BaseAddress = new Uri("http://historyservice/History");
+    client.BaseAddress = new Uri("http://nginx-proxy1:8084/History");
 });
 
+// Trigger the Monitoring class's static constructor.
+_ = Monitoring.Monitoring.ActivitySource;
 
 var app = builder.Build();
 

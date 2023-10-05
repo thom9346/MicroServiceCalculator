@@ -3,7 +3,11 @@ using HistoryService.Data;
 using HistoryService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Monitoring;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 using SharedModels;
+using System.Diagnostics;
 
 namespace HistoryService.Controllers
 {
@@ -23,6 +27,20 @@ namespace HistoryService.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] CalculationHistoryDto calculationDto)
         {
+            var propagator = new TraceContextPropagator();
+            var parentContext = propagator.Extract(default, Request.Headers, (headers, key) =>
+            {
+                if (headers.TryGetValue(key, out var values) && values.Count > 0)
+                {
+                    return new List<string> { values[0] };
+                }
+                return new List<string>();
+            });
+
+            Baggage.Current = parentContext.Baggage;
+            using var activity = Monitoring.Monitoring.ActivitySource.StartActivity("HistoryController.Post", ActivityKind.Server, parentContext.ActivityContext);
+
+
             if (calculationDto == null)
             {
                 return BadRequest();

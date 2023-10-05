@@ -1,0 +1,12 @@
+C:\Users\THolm\source\repos\Calculator\Monitoring\bin\Debug\net7.0\Monitoring.deps.json
+C:\Users\THolm\source\repos\Calculator\Monitoring\bin\Debug\net7.0\Monitoring.dll
+C:\Users\THolm\source\repos\Calculator\Monitoring\bin\Debug\net7.0\Monitoring.pdb
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.csproj.AssemblyReference.cache
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.AssemblyInfoInputs.cache
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.AssemblyInfo.cs
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.csproj.CoreCompileInputs.cache
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.dll
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\refint\Monitoring.dll
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\Monitoring.pdb
+C:\Users\THolm\source\repos\Calculator\Monitoring\obj\Debug\net7.0\ref\Monitoring.dll

@@ -8,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["PlusService/PlusService.csproj", "PlusService/"]
+COPY ["Monitoring/Monitoring.csproj", "Monitoring/"]
 RUN dotnet restore "PlusService/PlusService.csproj"
 COPY . .
 WORKDIR "/src/PlusService"
