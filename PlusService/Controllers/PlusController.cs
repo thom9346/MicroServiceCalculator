@@ -6,6 +6,7 @@ using Monitoring;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry;
 using System.Diagnostics;
+using OpenTelemetry.Trace;
 
 namespace PlusService.Controllers
 {
@@ -22,30 +23,52 @@ namespace PlusService.Controllers
         [HttpPost] 
         public IActionResult Add([FromBody] List<int> numbers)
         {
-            using (var activity = Monitoring.Monitoring.ActivitySource.StartActivity("Addition post"))
+            int result;
+
+            using (var activity = Monitoring.Monitoring.ActivitySource.StartActivity("POST request at the /Plus/ endpoint"))
             {
-                var result = numbers.Sum();
-                Monitoring.Monitoring.Log.Debug($"Started activity: {activity?.Kind}, ID: {activity?.Id}, ParentID: {activity?.ParentId}");
-                Monitoring.Monitoring.Log.Debug("Entered Add Method");
-    
+                Monitoring.Monitoring.Log.Debug("Entered Add Method In /Plus/ endpoint");
+
+                // Start a span for the calculation
+                using (var calculationSpan = Monitoring.Monitoring.ActivitySource.StartActivity("Making the calculation", ActivityKind.Internal, activity.Context))
+                {
+                    result = numbers.Sum();
+                    calculationSpan.SetTag("items.count", numbers.Count);
+                    calculationSpan.SetTag("result", result);
+                }
+                var expression = string.Join(" + ", numbers);
+
+                Monitoring.Monitoring.Log.Information($"Expression :{expression} had the following result: {result}");
+
                 var calculationHistory = new CalculationHistory
                 {
                     Id = Guid.NewGuid(),
                     Operation = "Addition",
-                    Expression = string.Join(" + ", numbers),
+                    Expression = expression,
                     Result = result
                 };
 
                 var jsonString = JsonSerializer.Serialize(calculationHistory);
                 var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
-                // _ is to explicitily discard the task returned by the async method without awaiting it. Fire and forget approach.
-                //Essentially supresses the warning that im not awaiting an async task.
-                _ = LogToHistoryServiceAsync(content);
-
+                // Start a span for the HTTP call to HistoryService
+                using (var clientSpan = Monitoring.Monitoring.ActivitySource.StartActivity("Async HTTP call to HistoryService", ActivityKind.Client, activity.Context))
+                {
+                    try
+                    {
+                        _ = LogToHistoryServiceAsync(content);
+                    }
+                    catch (Exception ex)
+                    {
+                        Monitoring.Monitoring.Log.Error($"Couldn't insert it into history db, cause of error: {ex}");
+                        activity.RecordException(ex);
+                        clientSpan.SetTag("status", "Error during HTTP call to HistoryService from PlusService");
+                    }
+                }
 
                 return Ok(result);
             }
+
         }
 
         private async Task LogToHistoryServiceAsync(HttpContent content)
@@ -53,7 +76,7 @@ namespace PlusService.Controllers
             try
             {
                 var client = _clientFactory.CreateClient("HistoryClient");
-                Monitoring.Monitoring.Log.Debug("Entered Log To History Service Async");
+                Monitoring.Monitoring.Log.Debug("Entered Log To History Service Async In /Plus/");
                 var currentActivity = Activity.Current;
                 if (currentActivity != null)
                 {
@@ -65,12 +88,12 @@ namespace PlusService.Controllers
                     });
                 }
 
-
                 await client.PostAsync("", content);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Couldn't insert it into history db, cause of error: {ex}");
+                Monitoring.Monitoring.Log.Error($"Couldn't insert it into history db, cause of error: {ex}");
             }
         }
 

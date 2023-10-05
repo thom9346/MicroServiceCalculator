@@ -154,7 +154,7 @@ services:
     ports:
       - 4202:4200
 
-  nginx-proxy1:
+  nginx-proxy:
     build:
       context: ./CalculatorFrontend
       dockerfile: Dockerfile.nginx
@@ -163,23 +163,7 @@ services:
       - 8084:8084
     depends_on:
       - angular-app1
-
-  nginx-proxy2:
-    build:
-      context: ./CalculatorFrontend
-      dockerfile: Dockerfile.nginx
-    ports:
-      - 8082:8081
-    depends_on:
       - angular-app2
-
-  nginx-proxy3:
-    build:
-      context: ./CalculatorFrontend
-      dockerfile: Dockerfile.nginx
-    ports:
-      - 8083:8081
-    depends_on:
       - angular-app3
 
 volumes:

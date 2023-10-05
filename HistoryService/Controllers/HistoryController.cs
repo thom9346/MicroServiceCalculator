@@ -38,14 +38,17 @@ namespace HistoryService.Controllers
             });
 
             Baggage.Current = parentContext.Baggage;
-            using var activity = Monitoring.Monitoring.ActivitySource.StartActivity("HistoryController.Post", ActivityKind.Server, parentContext.ActivityContext);
+            using var activity = Monitoring.Monitoring.ActivitySource.StartActivity("Entered Post In /History/ endpoint", ActivityKind.Server, parentContext.ActivityContext);
 
 
             if (calculationDto == null)
             {
+                Monitoring.Monitoring.Log.Warning("calculationDto is null, returned BadRequest");
                 return BadRequest();
             }
+      
             var calculation = _converter.Convert(calculationDto);
+            
             var newCalculation = _historyRepository.Add(calculation);
 
             return CreatedAtRoute("GetHistory", new { id = newCalculation.Id }, _converter.Convert(newCalculation));
@@ -54,16 +57,22 @@ namespace HistoryService.Controllers
         [HttpGet]
         public IEnumerable<CalculationHistoryDto> Get()
         {
-            var calculationHistoryDtoList = new List <CalculationHistoryDto>();
-            foreach (var calculation in _historyRepository.GetAll())
+            var calculationHistoryDtoList = new List<CalculationHistoryDto>();
+            Monitoring.Monitoring.Log.Debug("Entered Get() Method in /History/");
+
+            using (var activity = Monitoring.Monitoring.ActivitySource.StartActivity("Entered Get In /History/ endpoint", ActivityKind.Internal))
             {
-                var calculationHistoryDto = _converter.Convert(calculation);
-                calculationHistoryDtoList.Add(calculationHistoryDto);
+                foreach (var calculation in _historyRepository.GetAll())
+                {
+                    var calculationHistoryDto = _converter.Convert(calculation);
+                    calculationHistoryDtoList.Add(calculationHistoryDto);
+                };
             }
+            
             return calculationHistoryDtoList;
         }
 
-        [HttpGet("{id}", Name="GetHistory")]
+[HttpGet("{id}", Name="GetHistory")]
         public IActionResult Get(Guid id)
         {
             var item = _historyRepository.Get(id);

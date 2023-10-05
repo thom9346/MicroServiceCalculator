@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpClient("HistoryClient", client =>
 {
-    client.BaseAddress = new Uri("http://nginx-proxy1:8084/History");
+    client.BaseAddress = new Uri("http://nginx-proxy:8084/History");
 });
 
 // Trigger the Monitoring class's static constructor.

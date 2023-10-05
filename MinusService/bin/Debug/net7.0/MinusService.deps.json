@@ -12,7 +12,6 @@
           "Microsoft.Extensions.Http.Polly": "7.0.11",
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.17.0",
           "Polly": "7.2.4",
-          "SharedModels": "1.0.0",
           "Swashbuckle.AspNetCore": "6.4.0"
         },
         "runtime": {
@@ -138,11 +137,6 @@
             "assemblyVersion": "6.4.0.0",
             "fileVersion": "6.4.0.0"
           }
-        }
-      },
-      "SharedModels/1.0.0": {
-        "runtime": {
-          "SharedModels.dll": {}
         }
       }
     }
@@ -278,11 +272,6 @@
       "sha512": "sha512-1Hh3atb3pi8c+v7n4/3N80Jj8RvLOXgWxzix6w3OZhB7zBGRwsy7FWr4e3hwgPweSBpwfElqj4V4nkjYabH9nQ==",
       "path": "swashbuckle.aspnetcore.swaggerui/6.4.0",
       "hashPath": "swashbuckle.aspnetcore.swaggerui.6.4.0.nupkg.sha512"
-    },
-    "SharedModels/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     }
   }
 }

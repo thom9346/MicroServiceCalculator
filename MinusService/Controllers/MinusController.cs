@@ -2,6 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using MinusService.Models;
 using System.Text.Json;
 using System.Text;
+using Monitoring;
+using System.Diagnostics;
+using System.Linq.Expressions;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Context.Propagation;
+using OpenTelemetry;
 
 namespace MinusService.Controllers
 {
@@ -18,29 +24,57 @@ namespace MinusService.Controllers
         [HttpPost]
         public IActionResult Substract([FromBody] List<int> numbers)
         {
-            if (numbers == null || numbers.Count == 0)
-                return BadRequest("No numbers provided.");
-
-            var result = numbers.First();
-            for (int i = 1; i < numbers.Count; i++)
+            int result;
+            using (var activity = Monitoring.Monitoring.ActivitySource.StartActivity("POST request at the /Minus/ endpoint"))
             {
-                result -= numbers[i];
+                Monitoring.Monitoring.Log.Debug("Entered Substract Method In /Minus/ endpoint");
+
+                using (var calculationSpan = Monitoring.Monitoring.ActivitySource.StartActivity("Making the calculation", ActivityKind.Internal, activity.Context))
+                {
+                    result = numbers.First();
+                    for (int i = 1; i < numbers.Count; i++)
+                    {
+                        result -= numbers[i];
+                    }
+                    calculationSpan.SetTag("items.count", numbers.Count);
+                    calculationSpan.SetTag("result", result);
+                }
+
+                if (numbers == null || numbers.Count == 0)
+                {
+                    Monitoring.Monitoring.Log.Warning("No numbers provided for Substract at /Minus endpoint");
+                    return BadRequest("No numbers provided.");
+                }
+                var expression = string.Join(" - ", numbers);
+
+                Monitoring.Monitoring.Log.Information($"Expression :{expression} had the following result: {result}");
+
+                var calculationHistory = new CalculationHistory
+                {
+                    Id = Guid.NewGuid(),
+                    Operation = "Subtraction",
+                    Expression = expression,
+                    Result = result
+                };
+
+                var jsonString = JsonSerializer.Serialize(calculationHistory);
+                var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+
+                using (var clientSpan = Monitoring.Monitoring.ActivitySource.StartActivity("Async HTTP call to HistoryService", ActivityKind.Client, activity.Context))
+                {
+                    try
+                    {
+                        _ = LogToHistoryServiceAsync(content);
+                    }
+                    catch (Exception ex)
+                    {
+                        Monitoring.Monitoring.Log.Error($"Couldn't insert it into history db, cause of error: {ex}");
+                        activity.RecordException(ex);
+                        clientSpan.SetTag("status", "Error during HTTP call to HistoryService from MinusService");
+                    }
+                }
+                return Ok(result);
             }
-
-            var calculationHistory = new CalculationHistory
-            {
-                Id = Guid.NewGuid(),
-                Operation = "Subtraction",
-                Expression = string.Join(" - ", numbers),
-                Result = result
-            };
-
-            var jsonString = JsonSerializer.Serialize(calculationHistory);
-            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-
-            _ = LogToHistoryServiceAsync(content);
-
-            return Ok(result);
         }
 
         private async Task LogToHistoryServiceAsync(HttpContent content)
@@ -48,12 +82,24 @@ namespace MinusService.Controllers
             try
             {
                 var client = _clientFactory.CreateClient("HistoryClient");
+                Monitoring.Monitoring.Log.Debug("Entered Log To History Service Async In /Minus/");
+                var currentActivity = Activity.Current;
+                if (currentActivity != null)
+                {
+                    var propagationContext = new PropagationContext(currentActivity.Context, Baggage.Current);
+                    var propagator = new TraceContextPropagator();
+                    propagator.Inject(propagationContext, client.DefaultRequestHeaders, (headers, key, value) =>
+                    {
+                        headers.Add(key, value);
+                    });
+                }
+
                 await client.PostAsync("", content);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Couldn't insert it into history db, cause of error: {ex}");
-                // implement further logging or error handling here if needed.
+                Monitoring.Monitoring.Log.Error($"Couldn't insert it into history db, cause of error: {ex}");
             }
         }
     }
